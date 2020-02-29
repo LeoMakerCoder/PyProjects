@@ -1,0 +1,49 @@
+import requests
+import re
+
+url = input('输入网址：')
+headers = {'user-agent':'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36'}
+
+def get_html(url,headers):
+    res = requests.get(url,headers = headers)
+    return res
+
+def writedown(filename,file,encoding = 'utf-8'):
+    address = 'D:\\PyCode\\files\\' + filename
+    with open(address,'w',encoding = encoding) as f:
+        f.write(file)
+    
+    
+def SearchTitle(text):
+
+    initial_address = text.find('{\'button_tp\':\'title\'}')
+    title_lib = []
+    cite_lib = []
+
+    while initial_address>0:
+
+        title_start = text.find('{\'button_tp\':\'title\'}',initial_address)
+        title_end = text.find('</a>',title_start)
+        temp = text[title_start:title_end]
+        title = ''.join(re.findall('[\u4e00-\u9fa5]',temp))
+        title_lib.append(title)
+
+        cite_start = text.find('{\'button_tp\':\'sc_cited\'}',title_end)
+        cite_end = text.find('</a>',cite_start)
+        temp = text[cite_start:cite_end]
+        cite = re.findall(r'\d+',temp)
+        cite_lib.append(cite)
+
+        initial_address = text.find('{\'button_tp\':\'title\'}',cite_end)
+        
+        #print(initial_address)
+
+    return title_lib,cite_lib
+
+#下方代码为测试用
+response = get_html(url,headers)
+text = response.text
+[a,b] = SearchTitle(text)
+    
+print(a)
+print(b)
